@@ -28,6 +28,18 @@ This version uses the same game logic but here the hangman is displayed by means
 On this version you can sign up by fill in your name and your scre will be registered. 
 
 
+## Demonstration of the game
+
+#### The simple version :
+
+![simple_version_demo](simple_version_demo.PNG)
+
+#### The improved version :
+
+![improved_version_demo](improved_version_demo.PNG)
+
+
+By the way, the words to guess are French words, sorry for that !
 
 Good luck and have fun !! 
 
