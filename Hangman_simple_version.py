@@ -2,6 +2,7 @@
 """
 Created on Wed Nov 29 19:20:23 2017
 Julien Verdun
+Simple version of the hangman game.
 """
 
     
@@ -9,9 +10,6 @@ from tkinter import *
 from math import sqrt,pi
 from random import randint
 from tkinter.messagebox import *
-
-# Implémentation des classes shape, Rectangle, square et circle tirée des TD précédents.
-# Version simple du jeu.
 
 
 class Shape :
@@ -223,7 +221,7 @@ class FenPrincipale(Tk):
         f2.pack(side = TOP,padx = 5,pady = 5)
 
         self.__zoneAffichage = ZoneAffichage(self,480,320,'white',8)
-        self.title('Jeu du Pendu')
+        self.title('Hangman game')
         self.__zoneAffichage.pack(padx=5, pady=5)
 
         f1 = Frame(self)

@@ -1,206 +1,264 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Dec  3 14:00:47 2017
-
-@author: Julienv
+Julien Vedun
+Improved version of the hangman game.
 """
-# TD4 : Verdun Julien et Uzel Antoine
-# Version améliorée
+
 from tkinter import *
 from math import sqrt,pi
 from random import randint
 from tkinter.messagebox import *
 
+
 class ZoneAffichage(Canvas):
+    """
+        This class inherits of the class Canvas and creates the window where all the elements are displayed.
+        """
     def __init__(self,parent, w, h, c, n):
         Canvas.__init__(self, width = w, height = h, bg = c)
-        self.__nombrecoups = n #nombre de coups restant à jouer
+        self.__numbermoves = n #number of available moves.
     def afficher(self):
-        """Affiche les éléments du jeu du pendu"""
+        """
+        Dispayed the different texts and shapes of the window.
+        """
+        # Images that represents the hangman.
         self.delete(ALL)
-        nomImage = 'pendu{}.gif'.format(8-self.__nombrecoups)
-        self.photo = PhotoImage(file=nomImage)
+        # Depending on the number of moves available, displays the image of the hangman.
+        nameImage = 'hangman{}.gif'.format(8-self.__numbermoves)
+        self.photo = PhotoImage(file=nameImage)
         self.create_image(0,0, anchor=NW, image=self.photo)
         self.config(height=self.photo.height(),width=self.photo.width())
-    def getNombreCoupsPossible(self):
-        """Renvoie le nombre de coups restant"""
-        return self.__nombrecoups
-    def setNombreCoupsPossible(self,n):
-        """Modifie le nombre de coups restants"""
-        self.__nombrecoups = n
+    def getnumbermovesavailable(self):
+        """
+        Return the number of moves available.
+        """
+        return self.__numbermoves
+    def setnumbermovesavailable(self,n):
+        """
+        Set the number of moves available and give it the value n.
+        """
+        self.__numbermoves = n
         
-class Joueur():
-    def __init__(self,nom,scores):
-        self.__nom = nom
+class Player:
+    """
+    This class allows to create the profil of a player named "name" and with the score "scores".
+    """
+    def __init__(self,name,scores):
+        self.__name = name
         self.__scores = scores
-    def get_nom(self):
-        """ Renvoie le nom du joueur"""
-        return self.__nom
-    def set_nom(self,nom):
-        """ Modifie le nom du joueur (attribut self.__nom) par nom"""
-        self.__nom = nom
+    def get_name(self):
+        """
+        Return the name of the player.
+        """
+        return self.__name
+    def set_name(self,name):
+        """
+        CHange the name of the player with the given name "name".
+        """
+        self.__name = name
     def get_score(self):
-        """ Renvoie le score du joueur."""
+        """
+        Return the player's score.
+        """
         return self.__scores
     def set_score(self,score):
-        """ Modifie le score (attribut self.__score) du joueur"""
+        """
+        Change the score of the player with the given score "score".
+        """
         self.__scores = score
-    def affiche_joueurs(self):
-        """ Renvoie le nom et le score du joueur sous la forme d'une chaine de caractère"""
-        texte = str(self.get_nom()) + ' '*5 + str(self.get_score()) + '\n'
+    def affiche_players(self):
+        """
+        Return a string including the name and the score of the player.s
+        """
+        texte = str(self.get_name()) + ' '*5 + str(self.get_score()) + '\n'
         return texte
     
-class FenPrincipale(Tk,Joueur):
+class FenPrincipale(Tk,Player):
+    """
+    This class inherits of the class Tk and Player,
+    implements the logic of the game and modifies the elements of the window.
+    """
     def __init__(self):
         Tk.__init__(self)
+
         f2 = Frame(self)
         f2.pack(side = TOP,padx = 5,pady = 5)
+
+        # Create a text area for the rules of the games and a few explanations.
         self.__instructions = Label(self)
         self.__instructions.pack(side = LEFT)
         self.__instructions.config(text = 
-        'Bienvenue cher utilisateur.'+
-        '\n\nVoici les règles du jeu du pendu : '+
-        '\nTon objectif est de découvrir le mot caché'+
-        '\nen bas de l écran avant que le bonhomme ne '+
-        '\nsoit pendu. Tu peux si tu le souhaites abandonner'+
-        '\nla partie en cliquant sur le bouton je donne'+
-        '\nma langue au chat. Tu peux t inscrire si tu es'+
-        '\nun nouveau joueur en cliquant sur le bouton ajout'+
-        '\njouer. Si tu étais djà inscrit tu peux réutiliser'+
-        '\nton profil en cliquant sur le bouton choix joueur.'+
-        '\nTu peux à tout moment consulter ton score et'+
-        '\ncelui des autres joueurs en cliquant sur le bouton' +
-        '\nJoueurs et scores. Chaque partie gagnée te rapporte '+
-        '\n5 points plus le nombre de coups qu il te restait à jouer.'+
-        '\n\n Bonne chance et amuse toi bien ! ') 
+        'Welcome dear user.'+
+        '\n\nHere are the rules of the hangman game : '+
+        '\nYour goal is to find out the hidden word'+
+        '\nin the bottom of the window, before the man '+
+        '\nis completely hanged. You can, if you want, give up'+
+        '\nthe game by clicking on the button "Give up".'+
+        '\nIf you are new around here, you can sign up'+
+        '\nby clicking the button "Add a new player".'+
+        '\nIf you are already registered, you can use again'+
+        '\nyour profil by clicking on the button "Choose a player".'+
+        '\nYou can whenever you wnt check your score and'+
+        '\nthe scores of the other players by clicking on the button' +
+        '\n"Players and scores". Each winning game gives you '+
+        '\n5 points plus the number of moves left behind.'+
+        '\n\n Good luck and have fun ! ')
+
         self.__zoneAffichage = ZoneAffichage(self,480,320,'white',7)
-        self.title('Jeu du Pendu')
+        self.title('Hangman game')
         self.__zoneAffichage.pack(padx=5, pady=5)
+
         f1 = Frame(self)
         f1.pack(side=TOP, padx=5, pady=5)
-        self.__boutonNew = Button(f2, text ='Nouvelle partie', width=15, command = self.nouvellePartie).grid(row = 0, column = 0)     
-        self.__boutonQuitter  =  Button(f2,  text  ='Quitter',  command  = self.destroy).grid(row = 0, column = 1)
+
+        # Add the different buttons
+        self.__boutonNew = Button(f2, text ='New game', width=15, command = self.nouvellePartie).grid(row = 0, column = 0)
+        self.__boutonQuitter  =  Button(f2,  text  ='Exit',  command  = self.destroy).grid(row = 0, column = 1)
         self.__lmot = Label(self)
         self.__mot = ''
         self.__motaff = ''
         self.__lmot.pack(side=TOP)
-        self.__lmot.config(text='Bienvenue, vous pouvez commencer à jouer en cliquant sur Nouvelle Partie ')
+        self.__lmot.config(text='Welcome, you can play by clicking on the button New Game')
         self.__boutons = []
-        self.__boutonabandon = Button(f2,text = 'Je donne ma langue au chat',width = 30,command = self.abandon).grid(row = 0,column = 2)   
+        self.__boutonabandon = Button(f2,text = 'Give up',width = 30,command = self.abandon).grid(row = 0,column = 2)
+        # Add the buttons to choose the letters
         for i in range(26):
             bouton = MonBoutton(self,f1,chr(ord('A')+i))
             bouton.grid(row=(i//7)+2,column = i-7*(i//7)+2)
             self.__boutons.append(bouton)
             self.__boutons[i].config(command= self.__boutons[i].cliquer, state = DISABLED)
-        self.__liste_joueurs = []
-        self.__boutonjoueurs = Button(f2,text = 'Joueurs et scores',width = 30,command = self.affiche_joueurs_scores).grid(row = 0,column = 4)
-        self.__boutonajoutjoueur = Button(f2,text = 'Ajout joueur',width = 30,command = self.ajout_joueur).grid(row = 0,column = 5)
-        self.__boutonchoixjoueur = Button(f2, text = 'Choix joueur',width = 30, command = self.choix_joueur).grid(row = 0,column = 6)
-        self.__joueurselectionne = 0
-        self.__joueur = Label(self)
-        self.__joueur.pack(side = TOP)
+        self.__liste_players = []
+        self.__boutonplayers = Button(f2,text = 'Players and scores',width = 30,command = self.affiche_players_scores).grid(row = 0,column = 4)
+        self.__boutonajoutplayer = Button(f2,text = 'Add a new player',width = 30,command = self.ajout_player).grid(row = 0,column = 5)
+        self.__boutonchoixplayer = Button(f2, text = 'Choose a player',width = 30, command = self.choix_player).grid(row = 0,column = 6)
+        self.__playerselectionne = 0
+        self.__player = Label(self)
+        self.__player.pack(side = TOP)
     def set_score(self,score):
-        """ Modifie l'attribut contenant le score du joueur actuel et lui donne la valeur score."""
-        self.__liste_joueurs[self.__joueurselectionne].set_score(score)
-        #self.__score = score
+        """
+        Modify the score value of the current player with the given score.
+        """
+        self.__liste_players[self.__playerselectionne].set_score(score)
     def get_score(self):
-        """ Renvoie le score du joueur actuel si il y en a un, sinon renvoie None."""
-        if self.__joueurselectionne <= len(self.__liste_joueurs)-1:
-            return self.__liste_joueurs[self.__joueurselectionne].get_score()
+        """
+        Return the score of the current player and None if it doesn't exist.
+        """
+        if self.__playerselectionne <= len(self.__liste_players)-1:
+            return self.__liste_players[self.__playerselectionne].get_score()
         return None
-    def set_joueurselectionne(self,nom):
-        """ Modifie l'attribut contenant le nom du joueur actuel et lui donne la valeur nom."""
-        for i in range(len(self.__liste_joueurs)) :
-            if self.__liste_joueurs[i].get_nom() == nom:
-                self.__joueurselectionne = i
+    def set_playerselectionne(self,name):
+        """
+        Search in the list of player the player with the given name and register the index in the list
+        in a variable.
+        """
+        for i in range(len(self.__liste_players)) :
+            if self.__liste_players[i].get_name() == name:
+                self.__playerselectionne = i
                 return
-    def get_joueurselectionne(self):
-        """ Renvoie le nom du joueur actuel."""
-        return self.__joueurselectionne
-    def ajout(self,fen,nom):
+    def get_playerselectionne(self):
         """
-        Ajoute le nom obtenu par la méthode ajout_joueur
-        à la liste des joueurs        
+        Return the index of the current player in the list of players.
         """
-        nom = nom.get()
+        return self.__playerselectionne
+    def ajout(self,fen,name):
+        """
+        Add the name of the wrote by the player and close the window.
+        """
+        name = name.get()
         fen.destroy()
-        self.__liste_joueurs.append(Joueur(nom,0))
-    def ajout_joueur(self):
+        self.__liste_players.append(Player(name,0))
+    def ajout_player(self):
         """
-        Permet à un nouveau joueur de s'inscrire dans la base de données du jeu
-        du pendu. Il débute avec un score nul bien entendu.
+        Allow a new player to sign up in the database.
+        He become the game with a null score.
         """
         mafenetre = Tk()
-        mafenetre.title('Ajout d un joueur')
-        label = Label(mafenetre, text = 'Nom : ')
+        mafenetre.title('Add a player')
+        label = Label(mafenetre, text = 'name : ')
         label.pack(side = LEFT, padx = 5, pady = 5)
-        nom = StringVar()
-        texte = Entry(mafenetre, bg ='bisque', fg='maroon')# textvariable= nom,
+        name = StringVar()
+        texte = Entry(mafenetre, bg ='bisque', fg='maroon')# textvariable= name,
         texte.focus_set()
         texte.pack(side = LEFT, padx = 5, pady = 5) 
-        bouton = Button(mafenetre, text ='Valider', command = lambda: self.ajout(mafenetre,texte)).pack(side = LEFT, padx = 5, pady = 5)
-    def affiche_joueurs_scores(self):
+        bouton = Button(mafenetre, text ='OK', command = lambda: self.ajout(mafenetre,texte)).pack(side = LEFT, padx = 5, pady = 5)
+    def affiche_players_scores(self):
         """
-        Permet d'afficher les joueurs ainsi que leur score.
+        Display the latest players and their score.
         """
-        texte = 'Noms:     Scores:\n'
-        for elt in self.__liste_joueurs :
-            texte += elt.affiche_joueurs()
+        texte = 'Names:     Scores:\n'
+        for elt in self.__liste_players :
+            texte += elt.affiche_players()
         fenetre = Tk()
-        fenetre.title('Joueurs et scores')
-        bouton = Button(fenetre,text = 'Quitter',command = fenetre.destroy)
+        fenetre.title('Players et scores')
+        bouton = Button(fenetre,text = 'Exit',command = fenetre.destroy)
         bouton.pack(side = LEFT,padx = 5,pady = 5)
         lab=Label(fenetre, text=texte)
         lab.pack(side="left")
-    def modif_joueur(self,joueur):
-        """Modifie l'attribut contenant le nom du joueur actuel et affiche le nom du joueur actuel sur l'écran de jeu."""
-        self.set_joueurselectionne(joueur.get_nom())
-        self.__joueur.config(text = 'Vous jouez actuellement avec : {}'.format(joueur.get_nom()))
-    def choix_joueur(self):
-        """ Affiche une fenêtre contenant les noms de chaques joueurs inscrits sous forme d'un bouton."""
+    def modif_player(self,player):
+        """
+        Modify the variable including the current player name and
+        display his name on the window.
+        """
+        self.set_playerselectionne(player.get_name())
+        self.__player.config(text = 'You are playing with : {}'.format(player.get_name()))
+    def choix_player(self):
+        """
+        Display a window with a button for each signed up player
+        and allow a player to chooose an existing profil.
+        """
         fenetre = Tk()
-        fenetre.title('Choix du joueur')
-        l = len(self.__liste_joueurs)
-        for n in range(len(self.__liste_joueurs)) :
-            elt = self.__liste_joueurs[n]
-            Button(fenetre, text = '{}'.format(elt.get_nom()), command = lambda elt=elt : self.modif_joueur(elt)).grid(row = self.__liste_joueurs.index(elt),column = 0)
-        Button(fenetre, text = 'Valider choix',command = fenetre.destroy).grid(row = l,column = 0)
+        fenetre.title('Choose a player')
+        l = len(self.__liste_players)
+        for n in range(len(self.__liste_players)) :
+            elt = self.__liste_players[n]
+            Button(fenetre, text = '{}'.format(elt.get_name()), command = lambda elt=elt : self.modif_player(elt)).grid(row = self.__liste_players.index(elt),column = 0)
+        Button(fenetre, text = 'Validate choice',command = fenetre.destroy).grid(row = l,column = 0)
     def abandon(self):
-        """Affiche la reponse en cas d'abandon"""
-        self.__lmot.config(text='Le mot était - {} '.format(self.__mot))
+        """
+        Display the word in case of given up.
+        :return:
+        """
+        self.__lmot.config(text='The word was - {} '.format(self.__mot))
         self.finPartie()
     def finPartie(self):
-        """Termine la partie en bloquant les lettres du clavier"""
+        """
+        End the game.
+        """
         for elt in self.__boutons:
             elt.config(state=DISABLED)
     def nouvellePartie(self):
-        """Demarre une nouvelle partie : reinitialise le nombre
-        de coups possible, l ecran d affichage, genere un nouveau mot, etc..."""
+        """
+        Start a new game : reboote the number of available moves,
+        the window and generate a new word
+        """
         self.__zoneAffichage.delete(ALL)
         for elt in self.__boutons :
             elt.config(state = NORMAL)
         mot = self.nouveauMot()
-        self.__zoneAffichage.setNombreCoupsPossible(7)
+        self.__zoneAffichage.setnumbermovesavailable(7)
         self.__zoneAffichage.afficher()
         self.setmot(mot)
         self.setmotaff('*'*len(mot))
-        self.__lmot.config(text='Mot : {}'.format(self.__motaff))
-    def setmot(self,mot):
-        """Modifie le mot a deviner par mot"""
-        self.__mot = mot
-    def setmotaff(self,mot):
-        """Modifie le mot affiche par mot"""
-        self.__motaff = mot
+        self.__lmot.config(text='Word : {}'.format(self.__motaff))
+    def setmot(self,word):
+        """Modify the word to guess by word."""
+        self.__mot = word
+    def setmotaff(self,word):
+        """Modify the displayed word by word."""
+        self.__motaff = word
     def traitement(self,lettre):
-        """Gere les actions lors du clique sur une lettre du clavier"""
+        """
+        Implement the game logic when the player press a button.
+        """
         tourgagnant = 0
-        if self.__zoneAffichage.getNombreCoupsPossible() <= 1 : # si plus de tentative possible : c'est perdu
-            self.__lmot.config(text =' Vous avez perdu, le mot était : {}'.format(self.__mot))
+        if self.__zoneAffichage.getnumbermovesavailable() <= 1 : # if no more available moves : that's a defeat
+            self.__lmot.config(text =' You lost, the word was : {}'.format(self.__mot))
             self.finPartie() 
-        else : # si encore des tentatives
+        else : # if one or more moves available
             for i in range(len(self.__mot)):
-                if self.__mot[i] == lettre: #si la lettre selectionnee est presente dans le mot a deviner
-                    # on modifie les * du mot affiche par la lettre
+                if self.__mot[i] == lettre: #if the choosen letter was on the hidden word
+                    # the * of the displayed word are replaced by the letters
                     tourgagnant = 1
                     if i == len(self.__mot)-1:
                         self.setmotaff(self.__motaff[:i] + lettre)
@@ -209,38 +267,52 @@ class FenPrincipale(Tk,Joueur):
                     else :
                         self.setmotaff(self.__motaff[:i] + lettre + self.__motaff[i+1:])
                     self.__lmot.config(text='{}'.format(self.__motaff))
-        if tourgagnant == 0 : # si la lettre n'était pas présente dans le mot
-            self.__zoneAffichage.setNombreCoupsPossible(self.__zoneAffichage.getNombreCoupsPossible()-1)
+        if tourgagnant == 0 : # if the lettter wasn't in the hidden word
+            self.__zoneAffichage.setnumbermovesavailable(self.__zoneAffichage.getnumbermovesavailable()-1)
             self.__zoneAffichage.afficher()
-        if "*" not in self.__motaff: # si plus d'inconnues dans le mot, c'est gagne.
-            self.__lmot.config(text='{} - Bravo, vous avez gagné'.format(self.__mot))
-            if len(self.__liste_joueurs) > 0:
-                self.set_score(5+self.get_score()+self.__zoneAffichage.getNombreCoupsPossible())
+        if "*" not in self.__motaff: # if no more hidden letters on the word to guess, that's a win
+            self.__lmot.config(text='{} - Congratulations, you have won'.format(self.__mot))
+            if len(self.__liste_players) > 0:
+                self.set_score(5+self.get_score()+self.__zoneAffichage.getnumbermovesavailable())
             self.finPartie()
-    def chargeMots(self):
-        """Renvoie la liste des mots après avoir convertit le texte qui les contenait """
-        fichier = open('mots.txt','r')
+    def chargewords(self):
+        """
+        Return the list of <ords after having process them.
+        """
+        fichier = open('words.txt','r')
         texte = fichier.read()
         fichier.close()
-        liste_mots = texte.strip().split() #Transforme la chaine de caractère en une liste de mot.
-        return liste_mots
+        liste_words = texte.strip().split() #Change the string into a list of words.
+        return liste_words
     def nouveauMot(self):
-        """Renvoie un mot prit au hasard dans la liste de mot précédente """
-        liste_mots = self.chargeMots()
-        return liste_mots[randint(0,len(liste_mots))]
+        """
+        Return a random word of the list.
+        """
+        liste_words = self.chargewords()
+        return liste_words[randint(0,len(liste_words))]
    
    
 class MonBoutton(Button):
+    """
+    This class inherits of the class Button and allows to create a button
+    with text inside and to implement actions when the button is pressed.
+    """
     def __init__(self,fen,f,tex):
         Button.__init__(self,master=f,text=tex)
         self.__t = tex
         self.fen = fen
         self.config(command = self.cliquer)
     def cliquer(self):
-        """Lance la procedure de traitement a chaque clique sur une lettre """
+        """
+        Run the game logic whenever the button is pressed.
+        """
         self.config(state = DISABLED)
         self.fen.traitement(self.__t)
 
 
-fen = FenPrincipale()
-fen.mainloop()
+
+
+# Run the game
+if __name__ == "__main__":
+    fen = FenPrincipale()
+    fen.mainloop()
