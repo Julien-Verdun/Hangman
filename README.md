@@ -9,6 +9,8 @@ Two versions of the game was implemented :
 - the first one is the basic version, with only the game and nothing else. It was the goal of the school project.
 - the second one is a more advanced version, with other possibilities (create a player profile and monitor his score).
 
+You can play the game by running with python either "Hangman_simple_version.py" or "Hangman_complex_version.py". If you don't have python installed, you can run the executables included on both folders "Hangman_simple_version" and "Hangman_complex_version". 
+
 ## The simple version
 
 The rules of the games are pretty simple. 
